@@ -10,6 +10,9 @@
     "prisma:migrate": "prisma migrate dev",
     "postinstall": "prisma skills sync || exit 0"
   },
+  "prisma": {
+    "seed": "node ./prisma/seed.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DoanToKhoiNguyen/Ecommerce-backend-mvp.git"
@@ -32,6 +35,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
   }
 }
