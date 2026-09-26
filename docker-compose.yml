@@ -1,0 +1,41 @@
+services:
+  # Service 1: PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: ecom_postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ecom_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ecom_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Service 2: Node.js Express API
+  app:
+    build: .
+    container_name: ecom_express_api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres123@db:5432/ecom_db?schema=public"
+      JWT_SECRET: "super_secret_jwt_key_ecom_2026"
+      JWT_EXPIRES_IN: "1d"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npx prisma db push && npm start"
+
+volumes:
+  postgres_data:
