@@ -13,7 +13,7 @@ async function main() {
     await prisma.role.upsert({
       where: { roleid: 2 },
       update: {},
-      create: { roleid: 2, rolename: 'Customer' },
+      create: { roleid: 2, rolename: 'Normal' },
     });
   }
 
@@ -24,7 +24,7 @@ async function main() {
     await membershipModel.upsert({
       where: { mid: 1 },
       update: {},
-      create: { mid: 1, mname: 'Bronze', score: 0 },
+      create: { mid: 1, mname: 'Bronze', score: 10 },
     });
   } else {
     console.log('⚠️ Không tìm thấy model MemberShip trong Prisma Client');
