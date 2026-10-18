@@ -1,18 +1,21 @@
-const prisma = require('../config/db');
+const shipmentService = require('../services/shipmentService');
 
-// Admin cập nhật trạng thái giao hàng
 exports.updateShipmentStatus = async (req, res) => {
   try {
-    const { shipid } = req.params;
-    const { status } = req.body;
+    const updatedShipment = await shipmentService.updateShipmentStatus(
+      req.params.shipid,
+      req.body.status
+    );
 
-    const updatedShipment = await prisma.shipment.update({
-      where: { shipid: parseInt(shipid) },
-      data: { status }
+    res.status(200).json({
+      message: 'Cập nhật trạng thái vận chuyển thành công!',
+      updatedShipment
     });
-
-    res.status(200).json({ message: 'Cập nhật trạng thái vận chuyển thành công!', updatedShipment });
   } catch (error) {
-    res.status(500).json({ message: 'Lỗi server!', error: error.message });
+    const status = error.status || 500;
+    if (status === 500) console.error('updateShipmentStatus error:', error);
+    res.status(status).json({
+      message: status === 500 ? 'Lỗi server!' : error.message
+    });
   }
 };
