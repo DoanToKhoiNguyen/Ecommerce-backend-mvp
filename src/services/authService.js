@@ -41,7 +41,14 @@ exports.login = async ({ username, password }) => {
     throw fail(400, 'Thiếu username hoặc password!');
   }
 
-  const user = await prisma.user.findUnique({ where: { username } });
+  const user = await prisma.user.findUnique({
+    where: { username },
+    include: {
+      role: { select: { rolename: true } },
+      membership: { select: { mname: true, score: true } }
+    }
+  });
+
   const isValid = user && (await bcrypt.compare(password, user.password));
   if (!isValid) {
     throw fail(401, 'Tên đăng nhập hoặc mật khẩu không đúng!');
@@ -55,6 +62,12 @@ exports.login = async ({ username, password }) => {
 
   return {
     token,
-    user: { uid: user.uid, username: user.username, fullname: user.fullname, roleid: user.roleid }
+    user: {
+      uid: user.uid,
+      username: user.username,
+      fullname: user.fullname,
+      role: user.role.rolename,
+      score: user.membership.score
+    }
   };
 };

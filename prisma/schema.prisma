@@ -60,7 +60,7 @@ model Product {
 model Order {
   oid      Int      @id @default(autoincrement())
   uid      Int
-  createat DateTime @default(now()) @db.Timestamp
+  createat DateTime @default(now()) @db.Timestamptz(3)
 
   user         User          @relation(fields: [uid], references: [uid])
   orderDetails OrderDetail[]

@@ -1,17 +1,17 @@
 const prisma = require('../config/db');
 
 const fail = (status, message) => {
-    const err = new Error(message);
-    err.status = status;
-    return err;
+  const err = new Error(message);
+  err.status = status;
+  return err;
 };
 
 exports.createOrder = async (uid, items) => {
-    if(!Array.isArray(items) || items.length === 0){
-        throw fail (400, 'Đơn hàng không có sản phẩm');
-    }
+  if (!Array.isArray(items) || items.length === 0) {
+    throw fail(400, 'Đơn hàng không có sản phẩm');
+  }
 
-    return prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
     const newOrder = await tx.order.create({ data: { uid } });
 
     for (const item of items) {
@@ -53,17 +53,35 @@ exports.createOrder = async (uid, items) => {
   });
 };
 
-exports.getOrdersByUser = (uid) => {
-  return prisma.order.findMany({
+// exports.getOrdersByUser = (uid) => {
+//   return prisma.order.findMany({
+//     where: { uid: Number(uid) },
+//     include: {
+//       user: { select: { fullname: true } },
+//       orderDetails: {
+//         include: {
+//           product: { select: { pid: true, pname: true, price: true } }
+//         }
+//       },
+//       shipments: true
+//     }
+//   });
+// };
+const formatVN = (date) =>
+  new Date(date).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+
+exports.getOrdersByUser = async (uid) => {
+  const orders = await prisma.order.findMany({
     where: { uid: Number(uid) },
     include: {
       user: { select: { fullname: true } },
       orderDetails: {
-        include: {
-          product: { select: { pid: true, pname: true, price: true } }
-        }
+        include: { product: { select: { pid: true, pname: true, price: true } } }
       },
       shipments: true
-    }
+    },
+    orderBy: { createat: 'desc' }
   });
+
+  return orders.map((o) => ({ ...o, createatDisplay: formatVN(o.createat) }));
 };
