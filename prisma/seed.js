@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const bcrypt = require('bcryptjs');
 
 async function main() {
   // 1. Seed dữ liệu bảng Role
@@ -19,7 +20,7 @@ async function main() {
 
   // 2. Seed dữ liệu bảng MemberShip (thử cả memberShip và membership)
   const membershipModel = prisma.memberShip || prisma.membership;
-  
+
   if (membershipModel) {
     await membershipModel.upsert({
       where: { mid: 1 },
@@ -30,6 +31,23 @@ async function main() {
     console.log('⚠️ Không tìm thấy model MemberShip trong Prisma Client');
   }
 
+  if (prisma.user) {
+    // Mã hóa mật khẩu 'admin123'
+    const hashedPassword = await bcrypt.hash('123123', 10);
+
+    await prisma.user.upsert({
+      where: { username: 'admin' },
+      update: {},
+      create: {
+        username: 'admin',
+        fullname: 'Administrator',
+        password: hashedPassword,
+        roleid: 1, // Liên kết với Role 'Admin' (roleid = 1)
+        mid: 1,    // Liên kết với MemberShip 'Bronze' (mid = 1)
+      },
+    });
+    console.log('👤 Đã tạo tài khoản Admin mặc định thành công!');
+  }
   console.log('🌱 Seed dữ liệu Role & MemberShip thành công!');
 }
 
